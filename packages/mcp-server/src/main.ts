@@ -19,7 +19,7 @@ import {
  * freehand codegen.
  */
 
-const server = new McpServer({ name: "appcraft", version: "0.1.0" });
+const server = new McpServer({ name: "appcraft", version: "0.1.1" });
 
 const json = (value: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],

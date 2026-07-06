@@ -1,6 +1,6 @@
 {
   "name": "@appcraft-io/mcp-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for the AppCraft deterministic app compiler — agents build native Android apps via get_schema, create_app, edit_model, validate, compile, preview.",
   "license": "Apache-2.0",
   "author": "terminalis",
@@ -27,9 +27,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@appcraft-io/compiler": "^0.1.0",
-    "@appcraft-io/core": "^0.1.0",
-    "@appcraft-io/preview": "^0.1.0",
+    "@appcraft-io/compiler": "^0.1.1",
+    "@appcraft-io/core": "^0.1.1",
+    "@appcraft-io/preview": "^0.1.1",
     "@modelcontextprotocol/sdk": "^1.10.0",
     "fast-json-patch": "^3.1.1",
     "zod": "^3.24.0"

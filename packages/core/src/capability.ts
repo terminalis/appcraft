@@ -23,7 +23,7 @@ export interface CapabilityCard {
 export function capabilityCard(): CapabilityCard {
   return {
     formatVersion: "0.1",
-    compilerVersion: "0.1.0",
+    compilerVersion: "0.1.1",
     compilerTarget: "android (Kotlin, Jetpack Compose, Material 3, Room)",
     supported: {
       attributeTypes: [

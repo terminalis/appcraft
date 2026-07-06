@@ -9,7 +9,7 @@ program
   .description(
     "The deterministic app compiler: validate an app.acm.yaml model, generate a complete native Android project, or render an instant preview.",
   )
-  .version("0.1.0");
+  .version("0.1.1");
 
 program
   .command("validate")

@@ -1,0 +1,239 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://appcraft.io/schema/appcraft-0.1.json",
+  "title": "AppCraft model (app.acm.yaml)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["appcraft", "app"],
+  "properties": {
+    "appcraft": {
+      "type": "string",
+      "pattern": "^0\\.1$",
+      "description": "Model format version."
+    },
+    "app": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "package"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 50 },
+        "package": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "seedColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "darkMode": { "enum": ["system", "always", "never"] }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "entities": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entity" }
+        },
+        "enums": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/enumDef" }
+        }
+      }
+    },
+    "flows": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/flow" }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "screens": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/screen" }
+        }
+      }
+    },
+    "ml": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/mlBlock" }
+    },
+    "custom": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/customBlock" }
+    }
+  },
+  "definitions": {
+    "pascalName": { "type": "string", "pattern": "^[A-Z][A-Za-z0-9]*$" },
+    "camelName": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },
+    "attributeType": {
+      "type": "string",
+      "pattern": "^(id|text|int|decimal|bool|date|datetime|image|enum\\([A-Z][A-Za-z0-9]*\\))$"
+    },
+    "paramType": {
+      "type": "string",
+      "pattern": "^(id|text|int|decimal|bool|date|datetime|image|enum\\([A-Z][A-Za-z0-9]*\\)|[A-Z][A-Za-z0-9]*|list<[A-Z][A-Za-z0-9]*>)$"
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "storage", "attributes"],
+      "properties": {
+        "name": { "$ref": "#/definitions/pascalName" },
+        "storage": { "enum": ["device", "cloud", "memory"] },
+        "attributes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/attribute" }
+        },
+        "invariants": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "attribute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "$ref": "#/definitions/camelName" },
+        "type": { "$ref": "#/definitions/attributeType" },
+        "optional": { "type": "boolean" },
+        "derived": { "type": "boolean" }
+      }
+    },
+    "enumDef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "values"],
+      "properties": {
+        "name": { "$ref": "#/definitions/pascalName" },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/camelName" }
+        }
+      }
+    },
+    "param": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "$ref": "#/definitions/camelName" },
+        "type": { "$ref": "#/definitions/paramType" }
+      }
+    },
+    "step": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["if", "then"],
+          "properties": {
+            "if": { "type": "string", "minLength": 1 },
+            "then": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/step" } },
+            "else": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/step" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["call"],
+          "properties": {
+            "call": { "$ref": "#/definitions/camelName" },
+            "args": { "type": "array", "items": { "type": "string" } },
+            "assignTo": { "$ref": "#/definitions/camelName" }
+          }
+        }
+      ]
+    },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind"],
+      "properties": {
+        "name": { "$ref": "#/definitions/camelName" },
+        "kind": { "enum": ["create", "list", "crud", "search", "custom"] },
+        "entity": { "$ref": "#/definitions/pascalName" },
+        "sort": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["by", "order"],
+          "properties": {
+            "by": { "$ref": "#/definitions/camelName" },
+            "order": { "enum": ["asc", "desc"] }
+          }
+        },
+        "by": { "$ref": "#/definitions/camelName" },
+        "params": { "type": "array", "items": { "$ref": "#/definitions/param" } },
+        "returns": { "$ref": "#/definitions/paramType" },
+        "steps": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/step" } }
+      }
+    },
+    "screen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/definitions/pascalName" },
+        "flow": { "$ref": "#/definitions/camelName" },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/chartComponent" }
+        }
+      }
+    },
+    "chartComponent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "type", "entity", "x", "y"],
+      "properties": {
+        "kind": { "const": "chart" },
+        "type": { "enum": ["line", "bar"] },
+        "entity": { "$ref": "#/definitions/pascalName" },
+        "x": { "$ref": "#/definitions/camelName" },
+        "y": { "$ref": "#/definitions/camelName" },
+        "window": { "type": "string", "pattern": "^[1-9][0-9]*d$" }
+      }
+    },
+    "mlBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "entity", "model", "outputs"],
+      "properties": {
+        "name": { "$ref": "#/definitions/camelName" },
+        "kind": { "const": "classify" },
+        "entity": { "$ref": "#/definitions/pascalName" },
+        "model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file", "type"],
+          "properties": {
+            "file": { "type": "string", "minLength": 1 },
+            "type": { "enum": ["numData", "image", "sensorData"] }
+          }
+        },
+        "inputs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "outputs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "writeTo": { "$ref": "#/definitions/camelName" }
+      }
+    },
+    "customBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kotlin"],
+      "properties": {
+        "name": { "$ref": "#/definitions/camelName" },
+        "inputs": { "type": "array", "items": { "$ref": "#/definitions/param" } },
+        "output": { "$ref": "#/definitions/paramType" },
+        "kotlin": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
