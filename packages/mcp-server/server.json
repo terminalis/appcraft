@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.terminalis/appcraft",
+  "description": "Deterministic Android app compiler — agents write a small YAML model, the compiler emits the complete native app.",
+  "repository": {
+    "url": "https://github.com/terminalis/appcraft",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@appcraft-io/mcp-server",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

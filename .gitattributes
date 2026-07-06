@@ -1,0 +1,3 @@
+# Deterministic outputs need deterministic line endings: LF everywhere.
+* text=auto eol=lf
+*.pdf binary

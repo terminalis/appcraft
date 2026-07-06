@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "**.md"]
+  pull_request:
+    paths-ignore: ["docs/**", "**.md"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  toolchain:
+    name: toolchain (build + test wall)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+  android:
+    name: android (generate + assembleDebug x3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install pinned Android SDK packages
+        run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;34.0.0"'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+      - run: npm ci
+      - run: npm run build
+      - name: Generate each example twice; outputs must be byte-identical
+        run: |
+          set -eu
+          for ex in diabetes-tracker health-calculators field-notes; do
+            node packages/cli/dist/main.js generate "examples/$ex/app.acm.yaml" -o "out/$ex"
+            node packages/cli/dist/main.js generate "examples/$ex/app.acm.yaml" -o "out-repeat/$ex"
+            diff -r "out/$ex" "out-repeat/$ex"
+          done
+      - name: SonarQube Cloud scan of generated output
+        uses: sonarsource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Zero-bugs gate (0 open Security/Reliability issues in generated output)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bash .github/scripts/sonar-zero-bugs-gate.sh
+      - name: Build diabetes-tracker (GlucoLog)
+        run: gradle -p out/diabetes-tracker assembleDebug
+      - name: Build health-calculators (HealthCalc)
+        run: gradle -p out/health-calculators assembleDebug
+      - name: Build field-notes (FieldNotes)
+        run: gradle -p out/field-notes assembleDebug
+      - name: Upload debug APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: example-apks
+          path: out/*/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+          if-no-files-found: error

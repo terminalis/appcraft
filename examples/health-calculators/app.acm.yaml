@@ -1,0 +1,47 @@
+# HealthCalc — the paper's Health app (§Appendix F), ported to AppCraft 0.1.
+# Two custom flows with the BMI and calorie-count formulas verbatim from
+# Alwakeel, Lano & Alfraihi (IEEE Access 2025), Figures 1/10.
+
+appcraft: 0.1
+
+app:
+  name: HealthCalc
+  package: io.appcraft.healthcalc
+
+theme:
+  seedColor: "#00696D"
+  darkMode: system
+
+data:
+  enums:
+    - { name: Gender, values: [male, female] }
+    - { name: Exercise, values: [walking, jogging, running, swimming, weights] }
+
+flows:
+  - name: computeBmi
+    kind: custom
+    params:
+      - { name: height, type: decimal }
+      - { name: weight, type: decimal }
+    returns: decimal
+    steps:
+      - "result = weight / (height * height)"
+
+  - name: calorieCount
+    kind: custom
+    params:
+      - { name: exercise, type: enum(Exercise) }
+      - { name: gender, type: enum(Gender) }
+      - { name: times, type: decimal }
+    returns: decimal
+    steps:
+      - "factor = 250.0"
+      - if: "exercise == walking"
+        then: ["factor = 100.0"]
+      - if: "exercise == jogging"
+        then: ["factor = 200.0"]
+      - if: "exercise == running"
+        then: ["factor = 300.0"]
+      - if: "gender == male"
+        then: ["result = factor * (times / 60.0) * 1.5"]
+        else: ["result = factor * (times / 60.0)"]

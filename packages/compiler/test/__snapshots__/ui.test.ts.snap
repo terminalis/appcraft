@@ -1,0 +1,285 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`golden gates > file list snapshot (flagship) 1`] = `
+[
+  "app/build.gradle.kts",
+  "app/proguard-rules.pro",
+  "app/src/main/AndroidManifest.xml",
+  "app/src/main/java/io/appcraft/glucolog/AppGraph.kt",
+  "app/src/main/java/io/appcraft/glucolog/MainActivity.kt",
+  "app/src/main/java/io/appcraft/glucolog/data/GlucoseReadingGatewayImpl.kt",
+  "app/src/main/java/io/appcraft/glucolog/data/db/AppDatabase.kt",
+  "app/src/main/java/io/appcraft/glucolog/data/db/GlucoseReadingDao.kt",
+  "app/src/main/java/io/appcraft/glucolog/data/db/GlucoseReadingRoomEntity.kt",
+  "app/src/main/java/io/appcraft/glucolog/domain/ModelFacade.kt",
+  "app/src/main/java/io/appcraft/glucolog/domain/gateway/GlucoseReadingGateway.kt",
+  "app/src/main/java/io/appcraft/glucolog/domain/model/GlucoseReading.kt",
+  "app/src/main/java/io/appcraft/glucolog/domain/model/ReadingContext.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/Nav.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/components/Chart.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/components/Fields.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/components/Format.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/components/GlucoseReadingCard.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/components/ImagePickerField.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/screens/FindByDayScreen.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/screens/HistoryScreen.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/screens/LogReadingScreen.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/screens/WeeklyChartScreen.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/theme/Color.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/theme/Theme.kt",
+  "app/src/main/java/io/appcraft/glucolog/ui/theme/Type.kt",
+  "app/src/main/res/drawable/ic_launcher_foreground.xml",
+  "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+  "app/src/main/res/values/colors.xml",
+  "app/src/main/res/values/strings.xml",
+  "app/src/main/res/values/themes.xml",
+  "app/src/main/res/xml/data_extraction_rules.xml",
+  "build.gradle.kts",
+  "gradle.properties",
+  "gradle/libs.versions.toml",
+  "settings.gradle.kts",
+]
+`;
+
+exports[`golden gates > key file content snapshots > app/src/main/java/io/appcraft/glucolog/MainActivity.kt 1`] = `
+"package io.appcraft.glucolog
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import io.appcraft.glucolog.ui.destinations
+import io.appcraft.glucolog.ui.screens.*
+import io.appcraft.glucolog.ui.theme.GlucoLogTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        AppGraph.init(applicationContext)
+        setContent {
+            GlucoLogTheme {
+                AppRoot()
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppRoot() {
+    val navController = rememberNavController()
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                val backStack by navController.currentBackStackEntryAsState()
+                val currentRoute = backStack?.destination?.route
+                destinations.forEach { dest ->
+                    NavigationBarItem(
+                        selected = currentRoute == dest.route,
+                        onClick = {
+                            navController.navigate(dest.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            }
+                        },
+                        icon = { Icon(dest.icon, contentDescription = dest.label) },
+                        label = { Text(dest.label) },
+                    )
+                }
+            }
+        },
+    ) { padding ->
+        NavHost(
+            navController = navController,
+            startDestination = "logReading",
+            modifier = Modifier.padding(padding),
+        ) {
+            composable("logReading") { LogReadingScreen() }
+            composable("history") { HistoryScreen() }
+            composable("findByDay") { FindByDayScreen() }
+            composable("weeklyChart") { WeeklyChartScreen() }
+        }
+    }
+}
+"
+`;
+
+exports[`golden gates > key file content snapshots > app/src/main/java/io/appcraft/glucolog/domain/ModelFacade.kt 1`] = `
+"package io.appcraft.glucolog.domain
+
+import io.appcraft.glucolog.domain.gateway.GlucoseReadingGateway
+import io.appcraft.glucolog.domain.model.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+/**
+ * The use-case interactor facade. Depends exclusively on gateway interfaces
+ * (dependency rule: source dependencies point inward). One method per flow.
+ */
+class ModelFacade(
+    private val glucoseReadingGateway: GlucoseReadingGateway,
+) {
+    // flow: logReading (create GlucoseReading)
+    suspend fun logReading(item: GlucoseReading) = glucoseReadingGateway.upsert(item)
+
+    // flow: history (list GlucoseReading, by takenAt desc)
+    fun history(): Flow<List<GlucoseReading>> = glucoseReadingGateway.observeAll().map { list -> list.sortedByDescending { it.takenAt } }
+
+    // flow: findByDay (search GlucoseReading by takenAt; in-memory filter — v0.1 simplification for device-local data)
+    fun findByDay(query: String): Flow<List<GlucoseReading>> =
+        glucoseReadingGateway.observeAll().map { list -> list.filter { java.time.Instant.ofEpochMilli(it.takenAt).atZone(java.time.ZoneId.systemDefault()).toLocalDate().toString().startsWith(query.trim()) } }
+
+    // chart data source
+    fun observeGlucoseReading(): Flow<List<GlucoseReading>> = glucoseReadingGateway.observeAll()
+}
+"
+`;
+
+exports[`golden gates > key file content snapshots > app/src/main/java/io/appcraft/glucolog/ui/screens/LogReadingScreen.kt 1`] = `
+"package io.appcraft.glucolog.ui.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import io.appcraft.glucolog.AppGraph
+import io.appcraft.glucolog.domain.model.*
+import io.appcraft.glucolog.ui.components.*
+import kotlinx.coroutines.launch
+
+@Composable
+fun LogReadingScreen() {
+    val facade = AppGraph.modelFacade
+    val scope = rememberCoroutineScope()
+    var mmol by rememberSaveable { mutableStateOf("") }
+    val mmolValue = mmol.toDoubleOrNull()
+    val takenAt = rememberSaveable { System.currentTimeMillis() }
+    var context by rememberSaveable { mutableStateOf(ReadingContext.fasting) }
+    var note by rememberSaveable { mutableStateOf("") }
+    var mealPhoto by rememberSaveable { mutableStateOf<String?>(null) }
+    var saved by remember { mutableStateOf(false) }
+    val mmolError = when {
+        mmol.isBlank() -> "Required"
+        mmolValue == null -> "Enter a number"
+        mmolValue != null && !(mmolValue > 0) -> "Must satisfy: mmol > 0"
+        else -> null
+    }
+    val formValid = mmolError == null && mmolValue != null
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("Log Reading", style = MaterialTheme.typography.headlineSmall)
+        LabeledTextField(
+            value = mmol,
+            onValueChange = { mmol = it; saved = false },
+            label = "Mmol",
+            error = if (mmol.isBlank()) null else mmolError,
+            keyboardType = KeyboardType.Decimal,
+        )
+        DateTimeChip(label = "Taken At", millis = takenAt)
+        EnumDropdown(
+            label = "Context",
+            options = ReadingContext.entries,
+            selected = context,
+            onSelected = { context = it; saved = false },
+            optionLabel = { it.name },
+        )
+        LabeledTextField(
+            value = note,
+            onValueChange = { note = it; saved = false },
+            label = "Note",
+        )
+        ImagePickerField(label = "Meal Photo", uri = mealPhoto, onPicked = { mealPhoto = it; saved = false })
+        Button(
+            onClick = {
+                scope.launch {
+                    facade.logReading(
+                        GlucoseReading(
+                            id = java.util.UUID.randomUUID().toString(),
+                            mmol = mmolValue!!,
+                            takenAt = takenAt,
+                            context = context,
+                            note = note.trim().ifBlank { null },
+                            mealPhoto = mealPhoto,
+                        ),
+                    )
+                    saved = true
+                }
+            },
+            enabled = formValid,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Save")
+        }
+        if (saved) {
+            Text("Saved", color = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+"
+`;
+
+exports[`golden gates > key file content snapshots > gradle/libs.versions.toml 1`] = `
+"[versions]
+agp = "8.7.3"
+kotlin = "2.0.21"
+ksp = "2.0.21-1.0.25"
+composeBom = "2024.10.00"
+activityCompose = "1.9.3"
+navigationCompose = "2.8.3"
+room = "2.6.1"
+coil = "2.7.0"
+coreKtx = "1.15.0"
+lifecycle = "2.8.7"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-material-icons = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+"
+`;

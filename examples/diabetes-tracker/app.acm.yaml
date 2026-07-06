@@ -1,0 +1,63 @@
+# GlucoLog — flagship AppCraft example
+#
+# The demo narrative: "Build a diabetes companion app: log glucose readings
+# with meal photos, chart the week, store everything on-device."
+# This entire app is this file. Edits arrive as small diffs; the compiler
+# regenerates the native app deterministically. Diff, not drift.
+
+appcraft: 0.1
+
+app:
+  name: GlucoLog
+  package: io.appcraft.glucolog
+
+theme:
+  seedColor: "#2E7D32"
+  darkMode: system
+
+data:
+  entities:
+    - name: GlucoseReading
+      storage: device
+      attributes:
+        - { name: id,        type: id }
+        - { name: mmol,      type: decimal }
+        - { name: takenAt,   type: datetime }
+        - { name: context,   type: enum(ReadingContext) }
+        - { name: note,      type: text,  optional: true }
+        - { name: mealPhoto, type: image, optional: true }
+      invariants:
+        - "mmol > 0"
+  enums:
+    - { name: ReadingContext, values: [fasting, beforeMeal, afterMeal, bedtime] }
+
+flows:
+  - name: logReading
+    kind: create
+    entity: GlucoseReading
+
+  - name: history
+    kind: list
+    entity: GlucoseReading
+    sort: { by: takenAt, order: desc }
+
+  - name: findByDay
+    kind: search
+    entity: GlucoseReading
+    by: takenAt
+
+ui:
+  screens:
+    - name: WeeklyChart
+      components:
+        - kind: chart
+          type: line
+          entity: GlucoseReading
+          x: takenAt
+          y: mmol
+          window: 7d
+
+# Phase-2 upgrade path, one small diff each:
+#   ml:      add a numData risk classifier writing to a derived attribute
+#            (see docs/MODEL_SPEC.md worked example)
+#   custom:  add an exportCsv Kotlin block, call it from a flow

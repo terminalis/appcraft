@@ -1,0 +1,65 @@
+# FieldNotes — escape-hatch showcase: a `custom:` Kotlin block (verbatim,
+# preserved across regeneration) called from a custom flow, alongside the
+# standard create/list/search archetype.
+
+appcraft: 0.1
+
+app:
+  name: FieldNotes
+  package: io.appcraft.fieldnotes
+
+theme:
+  seedColor: "#6750A4"
+  darkMode: system
+
+data:
+  entities:
+    - name: FieldNote
+      storage: device
+      attributes:
+        - { name: id, type: id }
+        - { name: title, type: text }
+        - { name: body, type: text }
+        - { name: category, type: enum(Category) }
+        - { name: loggedAt, type: datetime }
+        - { name: flagged, type: bool }
+      invariants:
+        - "title != ''"
+  enums:
+    - { name: Category, values: [site, lab, interview, followUp] }
+
+flows:
+  - name: addNote
+    kind: create
+    entity: FieldNote
+
+  - name: notes
+    kind: list
+    entity: FieldNote
+    sort: { by: loggedAt, order: desc }
+
+  - name: findNote
+    kind: search
+    entity: FieldNote
+    by: title
+
+  - name: analyzeText
+    kind: custom
+    params:
+      - { name: body, type: text }
+    returns: text
+    steps:
+      - call: summarize
+        args: ["body"]
+        assignTo: summary
+      - "result = summary"
+
+custom:
+  - name: summarize
+    inputs:
+      - { name: body, type: text }
+    output: text
+    kotlin: |
+      val words = body.trim().split(Regex("\\s+")).filter { it.isNotBlank() }.size
+      val firstLine = body.lineSequence().firstOrNull().orEmpty().take(80)
+      return "$firstLine ($words words)"

@@ -1,0 +1,28 @@
+{
+  "name": "@appcraft-io/compiler",
+  "version": "0.1.0",
+  "description": "AppCraft deterministic compiler: app.acm.yaml model in, complete Android (Jetpack Compose / Material 3 / Room) Gradle project out.",
+  "license": "Apache-2.0",
+  "author": "terminalis",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/terminalis/appcraft.git",
+    "directory": "packages/compiler"
+  },
+  "homepage": "https://github.com/terminalis/appcraft#readme",
+  "bugs": "https://github.com/terminalis/appcraft/issues",
+  "keywords": ["android", "compiler", "code-generation", "model-driven", "jetpack-compose", "deterministic", "ai-agents", "mcp"],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@appcraft-io/core": "^0.1.0"
+  }
+}
