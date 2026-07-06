@@ -1,6 +1,6 @@
 {
   "name": "@appcraft-io/compiler",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AppCraft deterministic compiler: app.acm.yaml model in, complete Android (Jetpack Compose / Material 3 / Room) Gradle project out.",
   "license": "Apache-2.0",
   "author": "terminalis",
@@ -23,6 +23,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@appcraft-io/core": "^0.1.1"
+    "@appcraft-io/core": "^0.1.2"
   }
 }

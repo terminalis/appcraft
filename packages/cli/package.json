@@ -1,6 +1,6 @@
 {
   "name": "appcraft",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Deterministic app compiler for the AI era — CLI. Validate, generate, and preview complete native Android apps from a small YAML model.",
   "license": "Apache-2.0",
   "author": "terminalis",
@@ -23,9 +23,9 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@appcraft-io/compiler": "^0.1.1",
-    "@appcraft-io/core": "^0.1.1",
-    "@appcraft-io/preview": "^0.1.1",
+    "@appcraft-io/compiler": "^0.1.2",
+    "@appcraft-io/core": "^0.1.2",
+    "@appcraft-io/preview": "^0.1.2",
     "commander": "^12.1.0"
   }
 }

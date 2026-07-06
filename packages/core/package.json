@@ -1,6 +1,6 @@
 {
   "name": "@appcraft-io/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AppCraft model schema, validator, expression mini-language, and the capability card.",
   "license": "Apache-2.0",
   "author": "terminalis",
