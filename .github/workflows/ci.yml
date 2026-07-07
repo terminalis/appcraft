@@ -58,10 +58,14 @@ jobs:
             node packages/cli/dist/main.js generate "examples/$ex/app.acm.yaml" -o "out-repeat/$ex"
             diff -r "out/$ex" "out-repeat/$ex"
           done
+      - name: Resolve compiler version for the scan's new-code baseline
+        run: echo "COMPILER_VERSION=$(node -p "require('./packages/compiler/package.json').version")" >> "$GITHUB_ENV"
       - name: SonarQube Cloud scan of generated output
         uses: sonarsource/sonarqube-scan-action@v8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: -Dsonar.projectVersion=${{ env.COMPILER_VERSION }}
       - name: Zero-bugs gate (0 open Security/Reliability issues in generated output)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
