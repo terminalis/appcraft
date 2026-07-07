@@ -1,0 +1,31 @@
+name: guard
+
+# Private-content guard: fails if any tracked file carries a marker that
+# belongs to the maintainer's private repo. Runs on every push and PR with
+# no path filters — docs-only changes are exactly the ones most likely to
+# slip. False positives are fixed by refining the pattern in a PR, never by
+# removing the guard.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  private-content:
+    name: private-content guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Grep for private markers
+        run: |
+          set -eu
+          if git grep -I -n -E 'appcraft-internal|CONCEPT\.md|docs/roadmap|superpowers|OPERATIONS\.md|token=' -- . ':!.github/workflows/guard.yml' ; then
+            echo "::error::Private-content marker found (matches above)"
+            exit 1
+          fi
+          echo "guard clean"
