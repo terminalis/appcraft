@@ -226,4 +226,4 @@ ml:
 
 ## Out of scope for v0
 
-`cloud` storage backends, auth, `ml:` execution (spec'd, compiled in phase 2), iOS target, push notifications, maps, background jobs beyond simple reminders. The capability card enumerates these so agents can tell users the truth.
+`cloud` storage backends, auth, `ml:` execution (spec'd, compiled in phase 2), iOS target, push notifications, maps, background jobs. The capability card enumerates these so agents can tell users the truth.

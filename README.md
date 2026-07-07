@@ -26,15 +26,15 @@ This isn't speculative. The compilation half is peer-reviewed: [*AppCraft: Model
         ▼  (any AI agent, via the AppCraft MCP server)
 app.acm.yaml          ← the model: small, diffable, versioned, yours
         │
-        ▼  appcraft compile   (deterministic — no LLM in the compile path)
+        ▼  npx appcraft generate   (deterministic — no LLM in the compile path)
 Complete native Android project
   Jetpack Compose · Material 3 · Room · Clean Architecture
         │
-        ▼  appcraft build
+        ▼  gradle assembleDebug
 APK on your emulator
 ```
 
-Then: *"add an 8am reminder and CSV export"* → a 5-line model diff → recompile → zero drift.
+Then: *"add a fasting flag to readings and sort history oldest-first"* → a 2-line model diff → recompile → zero drift.
 
 One artifact, three doors:
 

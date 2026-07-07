@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AppCraft — the deterministic app compiler for the AI era</title>
+<meta name="description" content="AI agents write a small YAML model — never code. The AppCraft compiler turns it into a complete native Android app you fully own. Diff, not drift.">
+<meta property="og:title" content="AppCraft — diff, not drift">
+<meta property="og:description" content="Agents write the model. The compiler guarantees the app. A feature request is a 2-line reviewable diff.">
+<meta property="og:url" content="https://appcraft.io">
+<meta name="theme-color" content="#0f1115">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>⚙️</text></svg>">
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--text:#e6e6e6;--dim:#9aa4b2;--acc:#4ade80;--del:#f87171;--mono:Consolas,ui-monospace,monospace}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,'Segoe UI',sans-serif}
+main{max-width:860px;margin:0 auto;padding:0 20px}
+section{padding:44px 0;border-bottom:1px solid #232733}
+h1{font-size:2.6rem;line-height:1.15}
+h2{font-size:1.4rem;margin-bottom:14px}
+.lede{color:var(--dim);font-size:1.15rem;margin:16px 0 24px}
+.hero{padding-top:64px;text-align:center}
+video{width:100%;border-radius:10px;border:1px solid #232733;display:block}
+pre{background:var(--panel);border:1px solid #232733;border-radius:10px;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:.9rem}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.cols{grid-template-columns:1fr}h1{font-size:2rem}}
+.add{color:var(--acc)}.chg{color:var(--del)}.dim{color:var(--dim)}
+.btn{display:inline-block;background:var(--acc);color:#0b0d10;font-weight:600;padding:10px 22px;border-radius:8px;text-decoration:none;margin:6px}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid #39404f}
+a{color:var(--acc)}
+footer{padding:28px 0 48px;color:var(--dim);font-size:.85rem}
+.props div{background:var(--panel);border:1px solid #232733;border-radius:10px;padding:16px}
+.props{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:700px){.props{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+
+<section class="hero">
+  <h1>Diff, not drift.</h1>
+  <p class="lede">AppCraft is the deterministic app compiler for the AI era. An AI agent writes a small
+  YAML model — never code. The compiler emits a complete native Android app you fully own.
+  A feature request is a 2-line reviewable diff.</p>
+  <a class="btn" href="https://github.com/terminalis/appcraft">Star on GitHub</a>
+  <a class="btn ghost" href="#install">Install</a>
+</section>
+
+<section>
+  <h2>The change request is the diff</h2>
+  <div class="cols">
+    <pre><span class="dim">$ git diff app.acm.yaml</span>
+   attributes:
+     - { name: mmol,    type: decimal }
+<span class="add">+    - { name: fasting, type: bool }</span>
+   flows:
+     - name: history
+<span class="chg">-      sort: { by: takenAt, order: desc }</span>
+<span class="add">+      sort: { by: takenAt, order: asc }</span></pre>
+    <pre>What regenerates from those 2 lines:
+
+  Room schema &amp; entity
+  the create form (new toggle)
+  the list card &amp; sort
+  the data facade
+
+Deterministically. Same model +
+same compiler version → byte-identical
+output. No LLM below the model.</pre>
+  </div>
+</section>
+
+<section id="install">
+  <h2>Install</h2>
+  <p class="lede">For AI agents (the primary door) — one command:</p>
+  <pre>claude mcp add appcraft -- npx -y @appcraft-io/mcp-server</pre>
+  <p class="lede">For developers and CI:</p>
+  <pre>npx appcraft validate app.acm.yaml
+npx appcraft generate app.acm.yaml -o my-app-android
+npx appcraft preview  app.acm.yaml -o preview.html
+npx appcraft schema --card</pre>
+</section>
+
+<section>
+  <h2>Why a compiler beats codegen</h2>
+  <div class="props">
+    <div><strong>Guarantees</strong><br>The compiler proves properties of its output: architecture invariants,
+    correct permission manifests, lint-clean templates. An LLM can only probably do these.</div>
+    <div><strong>Auditability</strong><br>A model diff is reviewable by a non-engineer, an auditor, or an agent
+    verifying its own work. A 20,000-line codebase diff is not.</div>
+    <div><strong>Re-targetability</strong><br>The same model recompiles to next year's toolchain or a new
+    platform. No vibe-coded app migrates itself.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Honest about the ceiling</h2>
+  <p class="lede">AppCraft compiles <strong>data + flows + charts companion apps</strong>: trackers, clinical
+  companions, field tools, internal tools — with typed <code>custom:</code> Kotlin escape hatches preserved
+  verbatim across regeneration. It is deliberately not for games, social feeds, or video editors.
+  What it can and cannot do is a machine-readable
+  <a href="https://github.com/terminalis/appcraft/blob/main/packages/core/src/capability.ts">capability card</a>
+  agents must consult — <em>the card never lies</em>. Every example builds in CI against the real Android
+  toolchain (Compose, Material 3, Room) behind a zero-open-issues SonarQube Cloud gate.</p>
+</section>
+
+<footer>
+  <p><a href="https://github.com/terminalis/appcraft">GitHub</a> ·
+  <a href="https://www.npmjs.com/package/appcraft">npm</a> ·
+  MCP registry: <code>io.github.terminalis/appcraft</code> · Apache-2.0</p>
+  <p style="margin-top:10px">Compilation approach grounded in Alwakeel, Lano &amp; Alfraihi,
+  <a href="https://doi.org/10.1109/ACCESS.2025.3536321"><em>AppCraft: Model-Driven Development Framework for
+  Mobile Applications</em></a>, IEEE Access 2025 (CC BY 4.0). AppCraft is an independent clean-room
+  implementation and does not imply the authors' endorsement.</p>
+</footer>
+
+</main>
+</body>
+</html>
